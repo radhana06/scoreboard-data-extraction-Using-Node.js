@@ -1,0 +1,9 @@
+{
+  "scoreboard_title": "VISHAL",
+  "players": {
+    "J": {"frames": ["X", "5-", "-7", "4-", "X"], "cumulative": [15, 20, 27, 31], "final_total": 41},
+    "V": {"frames": ["8-", "3-", "71", "81", "9"], "cumulative": [8, 11, 19, 28], "final_total": 37},
+    "P": {"frames": ["X", "4/", "9-", "6-"], "cumulative": [20, 39, 48, 54], "final_total": 54},
+    "T": {"frames": ["61", "1/", "8-", "34"], "cumulative": [7, 25, 33, 40], "final_total": 40}
+  }
+}

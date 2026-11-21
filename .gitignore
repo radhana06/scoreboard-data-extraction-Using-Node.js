@@ -1,0 +1,5 @@
+node_modules/
+runtime/
+.tesseract-cache/
+.DS_Store
+bowling_scoreboard.mp4

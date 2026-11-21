@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bowling Scoreboard OCR</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 1100px; margin: 2rem auto; padding: 0 1rem; }
+    h1 { margin-bottom: .2rem; }
+    .caption { color: #666; margin-top: 0; }
+    button { background: #e5484d; color: #fff; border: 0; padding: .6rem 1.2rem; border-radius: 6px; font-size: 1rem; cursor: pointer; }
+    button:disabled { opacity: .5; cursor: wait; }
+    table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+    th, td { border: 1px solid #ddd; padding: .5rem; text-align: left; }
+    th { background: #f5f5f5; }
+    img { max-width: 100%; border: 1px solid #ddd; }
+    .info { background: #eef4ff; padding: .8rem 1rem; border-radius: 6px; }
+    .ok { background: #e7f7ec; padding: .8rem 1rem; border-radius: 6px; }
+    .err { background: #fdeaea; padding: .8rem 1rem; border-radius: 6px; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h1>🎳 Bowling Scoreboard Data Extraction</h1>
+  <p class="caption">Computer Vision Engineer – Round 1</p>
+
+  <input type="file" id="video" accept=".mp4,.mov,.avi">
+  <p id="hint" class="info">Upload the supplied bowling_scoreboard.mp4 to begin.</p>
+  <button id="run" style="display:none">Extract Scoreboard</button>
+  <div id="out"></div>
+
+  <script>
+    const fileInput = document.getElementById('video');
+    const runBtn = document.getElementById('run');
+    const hint = document.getElementById('hint');
+    const out = document.getElementById('out');
+
+    fileInput.addEventListener('change', () => {
+      const has = fileInput.files.length > 0;
+      runBtn.style.display = has ? 'inline-block' : 'none';
+      hint.style.display = has ? 'none' : 'block';
+      out.innerHTML = '';
+    });
+
+    const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+    runBtn.addEventListener('click', async () => {
+      runBtn.disabled = true;
+      out.innerHTML = '<p class="info">Processing video and running OCR...</p>';
+
+      const form = new FormData();
+      form.append('video', fileInput.files[0]);
+
+      try {
+        const res = await fetch('/extract', { method: 'POST', body: form });
+        const data = await res.json();
+
+        if (!res.ok) {
+          out.innerHTML = '<div class="err">' + esc(data.error) + '</div>';
+          return;
+        }
+
+        const rows = Object.entries(data.result.players).map(([player, v]) => `
+          <tr>
+            <td>${esc(player)}</td>
+            <td>${esc(v.frames.join(', '))}</td>
+            <td>${esc(v.cumulative.filter((x) => x !== null).join(', '))}</td>
+            <td>${esc((v.ttl || []).join(', '))}</td>
+          </tr>`).join('');
+
+        out.innerHTML = `
+          <p class="ok">Extraction complete using ${esc(data.result.ocr_engine)}</p>
+          <h2>Extracted scoreboard</h2>
+          <table>
+            <thead><tr><th>Player</th><th>Frame notation</th><th>Cumulative</th><th>TTL</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+          <img src="${data.image}" alt="Detected scoreboard ROI">
+          <p><em>Detected scoreboard ROI</em></p>
+          <p><a href="/download/json"><button type="button">Download JSON</button></a></p>`;
+      } catch (e) {
+        out.innerHTML = '<div class="err">' + esc(e) + '</div>';
+      } finally {
+        runBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

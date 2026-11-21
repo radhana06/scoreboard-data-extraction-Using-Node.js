@@ -1,0 +1,19 @@
+{
+  "name": "scoreboard-data-extraction",
+  "version": "1.0.0",
+  "description": "Bowling scoreboard data extraction from video (Node.js port)",
+  "main": "src/scoreboardExtractor.js",
+  "scripts": {
+    "extract": "node src/scoreboardExtractor.js input_video.mp4 --output outputs --samples 8 --engine auto",
+    "start": "node app.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "multer": "^1.4.5-lts.1",
+    "sharp": "^0.33.5",
+    "tesseract.js": "^5.1.1"
+  }
+}
